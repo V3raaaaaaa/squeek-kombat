@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Squeek Kombat</title>
+<meta name="description" content="1v1 hamster duels on Squeekchain. Your Genesis Squeek is your fighter; Squeektoshi's real wheel sets the arena. Results resolve on-chain on Sepolia.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=IBM+Plex+Mono:wght@400;600;700&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#050816;--panel:#0b1024;--panel-2:#121a36;--line:#22305c;--fg:#eef2ff;--muted:#8e9bc4;--faint:#5a6694;
+ --gold:#ffd166;--cyan:#6ad7ff;--green:#7dff9a;--red:#ff5e6c;--purple:#b48cff;--orange:#ff9f43;
+ --px:"Press Start 2P",ui-monospace,monospace;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--mono);line-height:1.5;font-size:14px;
+ background-image:radial-gradient(900px 420px at 50% -10%,rgba(106,215,255,.12),transparent 60%),radial-gradient(700px 380px at 90% 10%,rgba(255,209,102,.08),transparent 55%)}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}
+button{font-family:var(--mono)}:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+header{position:sticky;top:0;z-index:20;background:rgba(5,8,22,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;gap:12px;padding-block:12px;flex-wrap:wrap}
+.logo{font-family:var(--px);font-size:15px;color:var(--gold);text-shadow:0 0 14px rgba(255,209,102,.45);line-height:1.2}.logo span{color:var(--red)}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px}
+.pill .d{width:9px;height:9px;border-radius:50%;background:var(--faint)}
+.pill.jog .d{background:var(--green)}.pill.zoomies .d{background:var(--red)}.pill.zoomies{border-color:var(--red);color:var(--red)}
+.spacer{flex:1}
+.btn{background:var(--panel-2);color:var(--fg);border:1px solid var(--line);font-weight:700;font-size:12px;padding:9px 14px;border-radius:10px;cursor:pointer}
+.btn:hover{border-color:var(--cyan);color:var(--cyan)}.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff;font-family:var(--px);font-size:12px;padding:14px 22px;box-shadow:0 0 22px rgba(255,94,108,.4)}
+.btn.primary:hover{filter:brightness(1.08);color:#fff}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#1a1200}
+main{padding-block:18px;display:grid;gap:16px}
+section.card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+h2{font-family:var(--px);font-size:11px;color:var(--muted);margin:0 0 12px;letter-spacing:.06em}
+.grid2{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}.vs{display:none}}
+.vs{font-family:var(--px);font-size:22px;color:var(--red);align-self:center;text-shadow:0 0 16px rgba(255,94,108,.6)}
+.fcard{background:#070b1c;border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.fcard h3{margin:0;font-family:var(--px);font-size:9px;color:var(--muted);letter-spacing:.06em}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select{background:#050816;border:1px solid var(--line);color:var(--fg);font-family:var(--mono);font-size:13px;padding:9px 11px;border-radius:9px;min-width:0}
+input{flex:1}
+.fprev{display:flex;gap:12px;align-items:center;min-height:84px}
+.fprev img,.fprev .ph{width:84px;height:84px;border-radius:10px;border:1px solid var(--line);background:#050816;object-fit:cover;flex:none}
+.fprev .ph{display:flex;align-items:center;justify-content:center;font-family:var(--px);font-size:9px;color:var(--faint)}
+.fmeta{min-width:0;font-size:12px;line-height:1.55}.fmeta b{font-size:14px;display:block}
+.lv{font-family:var(--px);font-size:8px;padding:3px 6px;border-radius:5px;color:#050816;display:inline-block;margin:3px 0}
+.muted{color:var(--muted)}.faint{color:var(--faint)}.ok{color:var(--green)}.bad{color:var(--red)}.gold{color:var(--gold)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:14px}
+.stage{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#03050f}
+canvas#game{width:100%;height:auto;display:block;aspect-ratio:960/440}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(3,5,15,.78);text-align:center;padding:16px}
+.overlay h3{font-family:var(--px);font-size:clamp(14px,3.6vw,26px);margin:0;color:var(--gold);text-shadow:0 0 18px rgba(255,209,102,.5)}
+.overlay p{margin:0;color:var(--muted);font-size:13px;max-width:56ch}
+.log{font-size:12px;color:var(--muted);min-height:20px}.log b{color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}th{color:var(--faint);font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto}
+.tag{font-size:10px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.tag.open{color:var(--gold);border-color:var(--gold)}.tag.ready{color:var(--cyan);border-color:var(--cyan)}.tag.done{color:var(--green)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:820px){.two{grid-template-columns:1fr}}
+footer{margin-top:28px;border-top:1px solid var(--line)}footer .wrap{padding-block:18px;display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11px;color:var(--faint)}footer b{color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--panel-2);border:1px solid var(--line);padding:10px 14px;border-radius:10px;font-size:12px;max-width:92vw;z-index:50;display:none}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="logo">SQUEEK <span>KOMBAT</span></div>
+  <div class="pill nap" id="wpill"><span class="d"></span><span id="wtxt">reading the wheel…</span></div>
+  <div class="spacer"></div>
+  <span class="faint" id="netinfo" style="font-size:11px"></span>
+  <button class="btn" id="connect">Connect wallet</button>
+</div></header>
+
+<main class="wrap">
+  <section class="card">
+    <h2>FIGHTERS</h2>
+    <div class="grid2">
+      <div class="fcard">
+        <h3>P1 · YOUR SQUEEK</h3>
+        <div class="row"><select id="mySqueeks" style="flex:1"><option value="">connect wallet to list your Squeeks</option></select><input id="p1q" placeholder="or Squeek #id" style="max-width:140px"><button class="btn" id="p1load">Load</button></div>
+        <div class="fprev" id="p1prev"><div class="ph">P1</div><div class="fmeta"><b>No fighter</b><span class="muted">Pick one of your Squeeks. Staked Squeeks count (depositor = controller).</span></div></div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="fcard">
+        <h3>P2 · OPPONENT</h3>
+        <div class="row"><input id="p2q" placeholder="Squeek #id (any Squeek on Squeekchain)"><button class="btn" id="p2load">Load</button><button class="btn" id="p2rand">Random</button></div>
+        <div class="fprev" id="p2prev"><div class="ph">P2</div><div class="fmeta"><b>No opponent</b><span class="muted">Challenge any Squeek. Ratings are per Squeek.</span></div></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="arenaBtn" disabled>ARENA FIGHT · free · 1 tx</button>
+      <span class="faint">or</span>
+      <input id="wagerAmt" placeholder="SQK amount" style="max-width:130px" inputmode="decimal">
+      <button class="btn gold" id="wagerBtn" disabled>Post wager</button>
+    </div>
+    <div class="log" id="log" style="margin-top:10px">Connect a wallet on Sepolia to fight. Spectating works without one.</div>
+  </section>
+
+  <div class="stage">
+    <canvas id="game" width="960" height="440" aria-label="Squeek Kombat arena"></canvas>
+    <div class="overlay" id="ov"><h3>SQUEEK KOMBAT</h3>
+      <p>Duels resolve <b>on-chain</b> from both fighters' NFT levels, the live state of Squeektoshi's wheel (read from SqueekCore) and a block seed. The arena replays the exact on-chain result.</p>
+      <p class="faint" id="ovsub"></p></div>
+  </div>
+
+  <div class="two">
+    <section class="card"><h2>YOUR DUELS · WAGER INBOX</h2><div class="tbl"><table><thead><tr><th>#</th><th>Match</th><th class="num">Stake</th><th>Status</th><th></th></tr></thead><tbody id="inbox"><tr><td colspan="5" class="faint">Connect to see wagers for your Squeeks.</td></tr></tbody></table></div></section>
+    <section class="card"><h2>LEADERBOARD · RATING</h2><div class="tbl"><table><thead><tr><th>#</th><th>Squeek</th><th class="num">W</th><th class="num">L</th><th class="num">D</th><th class="num">Rating</th></tr></thead><tbody id="lb"><tr><td colspan="6" class="faint">Loading from chain events…</td></tr></tbody></table></div></section>
+  </div>
+
+  <section class="card"><h2>RECENT FIGHTS</h2><div class="tbl"><table><thead><tr><th>Duel</th><th>Fighters</th><th>Arena</th><th>Result</th><th>Tx</th><th></th></tr></thead><tbody id="feed"><tr><td colspan="6" class="faint">Loading…</td></tr></tbody></table></div></section>
+</main>
+
+<footer><div class="wrap">
+  <b>Squeek Kombat</b>
+  <span>· contract <a id="caddr" href="#" target="_blank" rel="noopener">not deployed yet</a></span>
+  <span>· built on <a href="https://squeekchain.com" target="_blank" rel="noopener">Squeekchain</a> · wheel via <a href="https://api.squeekchain.com/v1/status" target="_blank" rel="noopener">api.squeekchain.com</a></span>
+  <span>· Sepolia testnet · unaudited · tokens have no value · use a throwaway wallet</span>
+</div></footer>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+<script src="config.js"></script>
+<script src="sim.js"></script>
+<script>
+const C=window.KOMBAT_CONFIG, S=window.KombatSim, $=s=>document.querySelector(s);
+const RAR=[null,["Common","#8e9bc4"],["Uncommon","#7dff9a"],["Rare","#6ad7ff"],["Epic","#b48cff"],["Legendary","#ffd166"],["Mythic","#ff5e6c"],["Ancient","#ff9f43"],["Relic","#ff6ad5"],["Celestial","#9ff5ff"],["Squeektoshi","#ffd166"]];
+const ARENA_NAME=["NAP","JOG","ZOOMIES"];
+const toast=(m,ms=3200)=>{const t=$("#toast");t.textContent=m;t.style.display="block";clearTimeout(t._h);t._h=setTimeout(()=>t.style.display="none",ms);};
+const log=h=>$("#log").innerHTML=h;
+const short=a=>a?a.slice(0,6)+"…"+a.slice(-4):"";
+
+let ABI=null, ro=null, roK=null, signer=null, me=null, K=null, SQK=null;
+const ERC20=["function approve(address,uint256) returns (bool)","function allowance(address,address) view returns (uint256)","function balanceOf(address) view returns (uint256)","function decimals() view returns (uint8)"];
+const deployed=()=>C.kombat&&!/^0x0+$/.test(C.kombat);
+
+async function boot(){
+  ABI=await (await fetch("abi.json")).json();
+  ro=new ethers.JsonRpcProvider(C.rpc,C.chainId);
+  if(deployed()){roK=new ethers.Contract(C.kombat,ABI,ro);$("#caddr").textContent=short(C.kombat);$("#caddr").href=`${C.explorer}/address/${C.kombat}`;}
+  else{$("#ovsub").textContent="Contract address not configured yet — spectating only.";}
+  pollWheel();setInterval(pollWheel,10000);
+  if(deployed()){refreshBoards();setInterval(refreshBoards,30000);}
+  if(window.ethereum){window.ethereum.on?.("accountsChanged",()=>location.reload());window.ethereum.on?.("chainChanged",()=>location.reload());}
+}
+async function connect(){
+  if(!window.ethereum){toast("No wallet found. Install MetaMask (or any injected wallet).");return;}
+  const bp=new ethers.BrowserProvider(window.ethereum);
+  await bp.send("eth_requestAccounts",[]);
+  const net=await bp.getNetwork();
+  if(Number(net.chainId)!==C.chainId){
+    try{await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:C.chainHex}]});}
+    catch(e){toast("Switch your wallet to Sepolia.");return;}
+    location.reload();return;
+  }
+  signer=await bp.getSigner();me=await signer.getAddress();
+  if(deployed()){K=new ethers.Contract(C.kombat,ABI,signer);SQK=new ethers.Contract(C.sqk,ERC20,signer);}
+  $("#connect").textContent=short(me);$("#netinfo").textContent="Sepolia";
+  await listMySqueeks();updateButtons();if(deployed())refreshInbox();
+}
+$("#connect").onclick=connect;
+
+/* ---------- live wheel (REST for rpm visuals + contract for arena classification) ---------- */
+const wheel={rpm:0,arena:0,work:0,diff:0};
+async function pollWheel(){
+  try{const s=await (await fetch(C.api+"/status")).json();const m=s.measurement||{};
+    wheel.rpm=String(m.coreStatus||"").toUpperCase()==="IDLE"?0:(m.rpmMilli||0)/1000;}catch(e){}
+  try{if(roK){const [a,w,d]=await roK.currentArena();wheel.arena=Number(a);wheel.work=Number(w);wheel.diff=Number(d);}}catch(e){}
+  const cls=["nap","jog","zoomies"][wheel.arena];
+  $("#wpill").className="pill "+cls;
+  $("#wtxt").textContent=`ARENA: ${ARENA_NAME[wheel.arena]} · wheel ${wheel.rpm.toFixed(wheel.rpm<10?1:0)} rpm · work ${wheel.work||"—"}`;
+}
+
+/* ---------- fighters ---------- */
+const F={p1:null,p2:null};
+async function fetchSqueek(id){
+  const t=await (await fetch(`${C.api}/squeeks/${id}`)).json();
+  if(t.error)throw new Error("Squeek #"+id+" not found");
+  const cust=typeof t.custody==="object"?((t.custody.owner||"").toLowerCase()===C.staking.toLowerCase()?"staking":"wallet"):t.custody;
+  const f={id:String(t.tokenId),level:Number(t.level||1),basePower:Number(t.basePower||1000),custody:cust,img:t.metadata?.imageDataUri||null,name:t.metadata?.name||("Squeek #"+t.tokenId),controller:null,rec:null};
+  if(roK){try{f.controller=await roK.controllerOf(f.id);const r=await roK.recordOf(f.id);f.rec={w:Number(r.wins),l:Number(r.losses),d:Number(r.draws),rating:Number(r.rating)};}catch(e){}}
+  return f;
+}
+function renderPrev(el,f,err){
+  if(err){el.innerHTML=`<div class="ph">?</div><div class="fmeta"><b>Couldn't load</b><span class="muted">${err}</span></div>`;return;}
+  const [rn,rc]=RAR[Math.min(10,Math.max(1,f.level))];const s=S.statsFor(f.level);
+  const mine=me&&f.controller&&f.controller.toLowerCase()===me.toLowerCase();
+  el.innerHTML=`${f.img?`<img alt="${f.name}" src="${f.img}">`:`<div class="ph">#${f.id}</div>`}
+   <div class="fmeta"><b>${f.name}</b><span class="lv" style="background:${rc}">LV ${f.level} · ${rn.toUpperCase()}</span>
+   <div class="muted">HP ${s.hp} · L${s.light} H${s.heavy} S${s.special} · ${f.custody==="staking"?"staked":"wallet"}</div>
+   <div class="muted">${f.rec?`${f.rec.w}W ${f.rec.l}L ${f.rec.d}D · <span class="gold">${f.rec.rating}</span>`:"no record yet"} ${f.controller?`· ctrl ${short(f.controller)}${mine?' <span class="ok">(you)</span>':""}`:""}</div></div>`;
+}
+async function pick(slot,q){
+  q=String(q||"").trim();if(!/^\d{1,7}$/.test(q)){toast("Enter a Squeek #id");return;}
+  const el=$(slot==="p1"?"#p1prev":"#p2prev");el.innerHTML=`<div class="ph">…</div><div class="fmeta"><b>Loading…</b></div>`;
+  try{F[slot]=await fetchSqueek(q);renderPrev(el,F[slot]);}catch(e){F[slot]=null;renderPrev(el,null,e.message);}
+  updateButtons();
+}
+async function listMySqueeks(){
+  const sel=$("#mySqueeks");sel.innerHTML="";
+  try{const a=await (await fetch(`${C.api}/accounts/${me.toLowerCase()}`)).json();const toks=(a.tokens||[]).sort((x,y)=>y.level-x.level);
+    if(!toks.length){sel.innerHTML=`<option value="">no Squeeks in this wallet</option>`;return;}
+    sel.innerHTML=`<option value="">choose your Squeek…</option>`+toks.map(t=>`<option value="${t.tokenId}">#${t.tokenId} · LV${t.level} · ${t.custody}</option>`).join("");
+  }catch(e){sel.innerHTML=`<option value="">couldn't list (API)</option>`;}
+}
+$("#mySqueeks").onchange=e=>{if(e.target.value){$("#p1q").value=e.target.value;pick("p1",e.target.value);}};
+$("#p1load").onclick=()=>pick("p1",$("#p1q").value);$("#p2load").onclick=()=>pick("p2",$("#p2q").value);
+$("#p2rand").onclick=async()=>{for(let i=0;i<5;i++){const id=1+Math.floor(Math.random()*9600);$("#p2q").value=id;await pick("p2",id);if(F.p2)return;}};
+function updateButtons(){
+  const mine=F.p1&&me&&F.p1.controller&&F.p1.controller.toLowerCase()===me.toLowerCase();
+  const ok=!!(mine&&F.p2&&F.p1.id!==F.p2.id&&K);
+  $("#arenaBtn").disabled=!ok;$("#wagerBtn").disabled=!ok;
+  if(F.p1&&me&&!mine)log(`<span class="bad">You don't control Squeek #${F.p1.id}</span> — controller is ${short(F.p1.controller)}.`);
+}
+
+/* ---------- transactions ---------- */
+async function arenaFight(){
+  try{
+    $("#arenaBtn").disabled=true;log("Sending arena fight…");
+    const tx=await K.arenaFight(F.p1.id,F.p2.id);log(`Tx sent <a target="_blank" rel="noopener" href="${C.explorer}/tx/${tx.hash}">${short(tx.hash)}</a> — waiting for Sepolia…`);
+    const rc=await tx.wait();
+    const ev=rc.logs.map(l=>{try{return K.interface.parseLog(l);}catch(e){return null;}}).find(p=>p&&p.name==="ArenaFight");
+    if(!ev)throw new Error("no ArenaFight event");
+    await replayFromEvent({duelId:Number(ev.args.duelId),a:String(ev.args.challengerToken),b:String(ev.args.targetToken),arena:Number(ev.args.arena),seed:ev.args.seed,
+      winner:Number(ev.args.winner),hpA:Number(ev.args.hpA),hpB:Number(ev.args.hpB),ex:Number(ev.args.exchanges),tx:tx.hash,mode:"arena"});
+    refreshBoards();pick("p1",F.p1.id);pick("p2",F.p2.id);
+  }catch(e){log(`<span class="bad">${(e.shortMessage||e.message||"").slice(0,160)}</span>`);}
+  finally{updateButtons();}
+}
+async function postWager(){
+  try{
+    const amt=ethers.parseUnits(($("#wagerAmt").value||"0").trim()||"0",18);if(amt<=0n){toast("Enter an SQK amount");return;}
+    $("#wagerBtn").disabled=true;
+    const bal=await SQK.balanceOf(me);if(bal<amt){log(`<span class="bad">Not enough SQK</span> (have ${ethers.formatUnits(bal,18)})`);return;}
+    const al=await SQK.allowance(me,C.kombat);
+    if(al<amt){log("Approving SQK…");const t1=await SQK.approve(C.kombat,amt);await t1.wait();}
+    log("Posting wager…");const tx=await K.wagerChallenge(F.p1.id,F.p2.id,amt);await tx.wait();
+    log(`<span class="ok">Wager posted.</span> The controller of #${F.p2.id} can accept it from their inbox. <a target="_blank" rel="noopener" href="${C.explorer}/tx/${tx.hash}">tx</a>`);
+    refreshInbox();
+  }catch(e){log(`<span class="bad">${(e.shortMessage||e.message||"").slice(0,160)}</span>`);}
+  finally{updateButtons();}
+}
+async function acceptWager(id,stake){
+  try{const al=await SQK.allowance(me,C.kombat);if(al<stake){toast("Approving SQK…");const t1=await SQK.approve(C.kombat,stake);await t1.wait();}
+    const tx=await K.acceptWager(id);toast("Accepting…");await tx.wait();toast("Accepted. Resolve from the next block.");refreshInbox();}
+  catch(e){toast((e.shortMessage||e.message||"").slice(0,120));}
+}
+async function resolveWager(id){
+  try{const tx=await K.resolveWager(id);toast("Resolving…");const rc=await tx.wait();
+    const ev=rc.logs.map(l=>{try{return K.interface.parseLog(l);}catch(e){return null;}}).find(p=>p&&(p.name==="WagerResolved"||p.name==="WagerCancelled"));
+    if(ev&&ev.name==="WagerResolved"){const d=await roK.duelOf(id);
+      await replayFromEvent({duelId:id,a:String(d.challengerToken),b:String(d.targetToken),arena:Number(ev.args.arena),seed:ev.args.seed,winner:Number(ev.args.winner),hpA:Number(ev.args.hpA),hpB:Number(ev.args.hpB),ex:Number(ev.args.exchanges),tx:tx.hash,mode:"wager",payout:ev.args.payout});}
+    else toast("Duel voided (window expired) — stakes refunded.");
+    refreshBoards();refreshInbox();}
+  catch(e){toast((e.shortMessage||e.message||"").slice(0,120));}
+}
+async function cancelWager(id){try{const tx=await K.cancelWager(id);await tx.wait();toast("Wager withdrawn.");refreshInbox();}catch(e){toast((e.shortMessage||e.message||"").slice(0,120));}}
+$("#arenaBtn").onclick=arenaFight;$("#wagerBtn").onclick=postWager;
+
+/* ---------- event boards ---------- */
+async function queryAll(filter){
+  const latest=await ro.getBlockNumber();let from=C.deployBlock||Math.max(0,latest-40000);const out=[];
+  for(let a=from;a<=latest;a+=9000){const b=Math.min(latest,a+8999);try{out.push(...await roK.queryFilter(filter,a,b));}catch(e){}}
+  return out;
+}
+const lvlCache={};
+async function lvl(id){if(lvlCache[id])return lvlCache[id];try{const t=await (await fetch(`${C.api}/squeeks/${id}`)).json();lvlCache[id]=t.level||"?";}catch(e){lvlCache[id]="?";}return lvlCache[id];}
+async function refreshBoards(){
+  if(!roK)return;
+  try{
+    const rs=await queryAll(roK.filters.RatingChanged());const latest={};
+    for(const e of rs){latest[String(e.args.tokenId)]={rating:Number(e.args.rating),w:Number(e.args.wins),l:Number(e.args.losses),d:Number(e.args.draws)};}
+    const rows=Object.entries(latest).sort((a,b)=>b[1].rating-a[1].rating).slice(0,20);
+    $("#lb").innerHTML=rows.length?rows.map(([id,r],i)=>`<tr><td>${i+1}</td><td><a href="#" data-opp="${id}">#${id}</a></td><td class="num">${r.w}</td><td class="num">${r.l}</td><td class="num">${r.d}</td><td class="num gold">${r.rating}</td></tr>`).join(""):`<tr><td colspan="6" class="faint">No fights yet. Be the first.</td></tr>`;
+    document.querySelectorAll("[data-opp]").forEach(a=>a.onclick=e=>{e.preventDefault();$("#p2q").value=a.dataset.opp;pick("p2",a.dataset.opp);});
+    const af=await queryAll(roK.filters.ArenaFight());const wr=await queryAll(roK.filters.WagerResolved());
+    const feed=[...af.map(e=>({blk:e.blockNumber,duelId:Number(e.args.duelId),a:String(e.args.challengerToken),b:String(e.args.targetToken),arena:Number(e.args.arena),seed:e.args.seed,winner:Number(e.args.winner),hpA:Number(e.args.hpA),hpB:Number(e.args.hpB),ex:Number(e.args.exchanges),tx:e.transactionHash,mode:"arena"})),
+      ...await Promise.all(wr.map(async e=>{const d=await roK.duelOf(e.args.duelId);return {blk:e.blockNumber,duelId:Number(e.args.duelId),a:String(d.challengerToken),b:String(d.targetToken),arena:Number(e.args.arena),seed:e.args.seed,winner:Number(e.args.winner),hpA:Number(e.args.hpA),hpB:Number(e.args.hpB),ex:Number(e.args.exchanges),tx:e.transactionHash,mode:"wager"};}))]
+      .sort((x,y)=>y.blk-x.blk).slice(0,15);
+    window._feed=feed;
+    $("#feed").innerHTML=feed.length?feed.map((f,i)=>`<tr><td>#${f.duelId} <span class="tag">${f.mode}</span></td><td>#${f.a} vs #${f.b}</td><td>${ARENA_NAME[f.arena]}</td><td>${f.winner===2?"draw":(f.winner===0?`#${f.a} wins`:`#${f.b} wins`)} <span class="faint">${f.hpA}–${f.hpB}</span></td><td><a target="_blank" rel="noopener" href="${C.explorer}/tx/${f.tx}">${short(f.tx)}</a></td><td><button class="btn" data-replay="${i}">Replay</button></td></tr>`).join(""):`<tr><td colspan="6" class="faint">No fights yet.</td></tr>`;
+    document.querySelectorAll("[data-replay]").forEach(b=>b.onclick=()=>replayFromEvent(window._feed[+b.dataset.replay]));
+  }catch(e){console.warn(e);}
+}
+async function refreshInbox(){
+  if(!roK||!me)return;
+  try{
+    const created=await queryAll(roK.filters.WagerCreated());const rows=[];
+    for(const e of created){const id=Number(e.args.duelId);const d=await roK.duelOf(id);const st=Number(d.status);if(st===3||st===4)continue;
+      const a=String(d.challengerToken),b=String(d.targetToken);
+      let role="";if(d.challenger.toLowerCase()===me.toLowerCase())role="challenger";
+      else{try{const c=await roK.controllerOf(b);if(c.toLowerCase()===me.toLowerCase())role="target";}catch(x){}}
+      if(!role&&st!==2)continue;
+      rows.push({id,a,b,stake:d.wager,st,role,target:d.target});}
+    $("#inbox").innerHTML=rows.length?rows.map(r=>{const stake=ethers.formatUnits(r.stake,18);let act="";
+      if(r.st===1&&r.role==="target")act=`<button class="btn" onclick="acceptWager(${r.id},${r.stake}n)">Accept</button>`;
+      else if(r.st===1&&r.role==="challenger")act=`<button class="btn" onclick="cancelWager(${r.id})">Withdraw</button>`;
+      else if(r.st===2)act=`<button class="btn" onclick="resolveWager(${r.id})">Resolve</button>`;
+      return `<tr><td>${r.id}</td><td>#${r.a} vs #${r.b} <span class="faint">(${r.role||"spectator"})</span></td><td class="num">${stake} SQK</td><td><span class="tag ${r.st===1?"open":"ready"}">${r.st===1?"open":"ready"}</span></td><td>${act}</td></tr>`;}).join("")
+      :`<tr><td colspan="5" class="faint">No open wagers for your Squeeks.</td></tr>`;
+  }catch(e){console.warn(e);}
+}
+window.acceptWager=acceptWager;window.resolveWager=resolveWager;window.cancelWager=cancelWager;
+
+/* ---------- replay engine (canvas) ---------- */
+const cv=$("#game"),cx=cv.getContext("2d"),W=960,H=440,FLOOR=360;
+const R={active:false,a:null,b:null,res:null,step:-1,phase:0,t:0,fx:[],shake:0,msg:"",msgT:0,meta:null,verified:null,done:false};
+const colorFor=id=>{const h=(Number(id)*137)%360;return {fur:`hsl(${h} 70% 62%)`,dark:`hsl(${h} 60% 40%)`,belly:`hsl(${h} 60% 85%)`};};
+async function replayFromEvent(ev){
+  const [la,lb]=await Promise.all([lvl(ev.a),lvl(ev.b)]);
+  const res=S.fight(Number(la),Number(lb),ev.arena,ev.seed);
+  const verified=res.winner===ev.winner&&res.hpA===ev.hpA&&res.hpB===ev.hpB&&res.exchanges===ev.ex;
+  const [fa,fb]=await Promise.all([fetchSqueek(ev.a).catch(()=>({id:ev.a,level:la,name:"Squeek #"+ev.a})),fetchSqueek(ev.b).catch(()=>({id:ev.b,level:lb,name:"Squeek #"+ev.b}))]);
+  const mk=(f,x,face)=>({f,x,y:FLOOR,face,hp:S.statsFor(f.level).hp,max:S.statsFor(f.level).hp,meter:0,state:"idle",color:colorFor(f.id),img:null,flash:0});
+  R.a=mk(fa,300,1);R.b=mk(fb,660,-1);for(const p of [R.a,R.b]){if(p.f.img){const i=new Image();i.onload=()=>p.img=i;i.src=p.f.img;}}
+  R.res=res;R.meta=ev;R.verified=verified;R.step=-1;R.phase=0;R.t=0;R.active=true;R.done=false;R.fx=[];R.msg=`ARENA · ${ARENA_NAME[ev.arena]}`;R.msgT=70;
+  $("#ov").hidden=true;window.scrollTo({top:$(".stage").offsetTop-70,behavior:"smooth"});
+  log(`Replaying duel #${ev.duelId}: #${ev.a} (LV${la}) vs #${ev.b} (LV${lb}) · arena ${ARENA_NAME[ev.arena]} · ${verified?'<span class="ok">local sim matches on-chain result</span>':'<span class="bad">local sim MISMATCH</span>'} · <a target="_blank" rel="noopener" href="${C.explorer}/tx/${ev.tx}">tx</a>`);
+}
+function pulse(p,ev,dmg){p.flash=8;R.shake=ev==="crit"?12:ev==="blocked"?3:dmg>0?6:0;
+  const col=ev==="crit"?"#ff5e6c":ev==="blocked"?"#6ad7ff":ev==="whiff"?"#5a6694":"#ffd166";
+  for(let i=0;i<(dmg>0?10:3);i++)R.fx.push({x:p.x,y:p.y-50,vx:(Math.random()-.5)*8,vy:-Math.random()*6,ttl:22,c:col});
+  R.fx.push({x:p.x,y:p.y-95,vx:0,vy:-1.1,ttl:40,txt:dmg>0?`-${dmg}${ev==="crit"?" CRIT":""}`:(ev==="blocked"?"BLOCK":ev==="whiff"?"MISS":""),c:col});}
+function tick(){
+  if(!R.active||R.done)return;
+  R.t++;const L=R.res.log;
+  if(R.step===-1){if(R.t>70){R.step=0;R.phase=0;R.t=0;}return;}
+  if(R.step>=L.length){R.done=true;const w=R.res.winner;R.msg=w===2?"DRAW":(w===0?`#${R.a.f.id} WINS`:`#${R.b.f.id} WINS`);R.msgT=1e9;
+    const ov=$("#ov");ov.hidden=false;ov.innerHTML=`<h3>${R.msg}</h3><p>${R.a.f.name} ${R.res.hpA} – ${R.res.hpB} ${R.b.f.name} · ${R.res.exchanges} exchanges · arena ${ARENA_NAME[R.res.arena]}${R.meta.payout?` · payout ${ethers.formatUnits(R.meta.payout,18)} SQK`:""}</p>
+      <p class="${R.verified?"ok":"bad"}">${R.verified?"✔ replay verified against the on-chain result":"✖ replay did not match the chain"}</p><p><a target="_blank" rel="noopener" href="${C.explorer}/tx/${R.meta.tx}">view transaction</a></p>`;return;}
+  const e=L[R.step];const A=R.a,B=R.b;
+  // phase 0: A acts (0-18), phase 1: B acts (18-36), phase 2: settle (36-50)
+  if(R.t===1){A.state=["atk","atk","block","special"][e.actA];A.kind=e.actA;}
+  if(R.t===10){if(e.actA!==2)pulse(B,e.evA,e.dmgToB);B.hp=Math.max(0,B.hp-e.dmgToB);if(e.dmgToB>0)B.state="hit";}
+  if(R.t===18){A.state="idle";B.state=["atk","atk","block","special"][e.actB];B.kind=e.actB;}
+  if(R.t===28){if(e.actB!==2)pulse(A,e.evB,e.dmgToA);A.hp=Math.max(0,A.hp-e.dmgToA);if(e.dmgToA>0)A.state="hit";}
+  if(R.t===36){A.state="idle";B.state="idle";A.meter=e.mA;B.meter=e.mB;}
+  if(R.t>=46){R.step++;R.t=0;}
+}
+function drawHamster(p,frame){
+  const {fur,dark,belly}=p.color;const bob=p.state==="idle"?Math.sin(frame/8)*2:0;
+  cx.save();cx.translate(p.x,p.y+bob);cx.scale(p.face,1);if(p.flash>0&&p.flash%2===0)cx.globalAlpha=.45;
+  const atk=p.state==="atk"||p.state==="special";const lean=atk?10:p.state==="block"?-6:0;
+  cx.fillStyle="rgba(0,0,0,.45)";cx.beginPath();cx.ellipse(0,2,30,7,0,0,7);cx.fill();
+  cx.strokeStyle=dark;cx.lineWidth=4;cx.beginPath();cx.moveTo(-26,-18);cx.quadraticCurveTo(-40,-26,-36,-40);cx.stroke();
+  cx.fillStyle=fur;cx.beginPath();cx.ellipse(lean*.4,-28,30,26,0,0,7);cx.fill();
+  cx.fillStyle=belly;cx.beginPath();cx.ellipse(lean*.6+6,-22,16,15,0,0,7);cx.fill();
+  cx.strokeStyle=dark;cx.lineWidth=6;cx.lineCap="round";cx.beginPath();cx.moveTo(-10,-8);cx.lineTo(-12,2);cx.stroke();cx.beginPath();cx.moveTo(10,-8);cx.lineTo(12,2);cx.stroke();
+  cx.fillStyle=fur;cx.beginPath();cx.arc(22+lean,-52,20,0,7);cx.fill();
+  cx.fillStyle=dark;cx.beginPath();cx.arc(12+lean,-70,7,0,7);cx.fill();cx.beginPath();cx.arc(30+lean,-70,7,0,7);cx.fill();
+  cx.fillStyle="#ffb3c7";cx.beginPath();cx.arc(12+lean,-70,3.5,0,7);cx.fill();cx.beginPath();cx.arc(30+lean,-70,3.5,0,7);cx.fill();
+  cx.fillStyle="#111";cx.beginPath();cx.arc(30+lean,-54,3,0,7);cx.fill();if(p.state==="hit")cx.fillRect(26+lean,-57,8,2);
+  cx.fillStyle="#ff8aa0";cx.beginPath();cx.arc(40+lean,-48,3,0,7);cx.fill();
+  cx.strokeStyle=dark;cx.lineWidth=7;
+  if(atk){const ext=p.kind===3?70:p.kind===1?52:38;cx.beginPath();cx.moveTo(18,-36);cx.lineTo(18+ext,-40);cx.stroke();cx.fillStyle=fur;cx.beginPath();cx.arc(18+ext,-40,9,0,7);cx.fill();
+    cx.strokeStyle=p.kind===3?"#b48cff":"#ffd166";cx.lineWidth=3;cx.beginPath();cx.arc(18+ext+6,-40,14+(frame%3)*3,-.9,.9);cx.stroke();
+    if(p.kind===3){cx.globalAlpha=.35;cx.fillStyle="#b48cff";cx.beginPath();cx.ellipse(-20,-30,34,30,0,0,7);cx.fill();}}
+  else if(p.state==="block"){cx.beginPath();cx.moveTo(14,-40);cx.lineTo(30,-30);cx.stroke();cx.beginPath();cx.moveTo(14,-30);cx.lineTo(30,-44);cx.stroke();cx.strokeStyle="rgba(106,215,255,.9)";cx.lineWidth=3;cx.beginPath();cx.arc(34,-38,22,-1.3,1.3);cx.stroke();}
+  else{cx.beginPath();cx.moveTo(16,-36);cx.lineTo(30,-28);cx.stroke();}
+  cx.restore();if(p.flash>0)p.flash--;
+}
+function bar(x,y,w,h,pct,col,rtl){cx.fillStyle="#0b1024";cx.fillRect(x,y,w,h);cx.strokeStyle="#22305c";cx.lineWidth=2;cx.strokeRect(x,y,w,h);const fw=Math.max(0,Math.min(1,pct))*(w-4);cx.fillStyle=col;cx.fillRect(rtl?x+2+(w-4-fw):x+2,y+2,fw,h-4);}
+function hud(){const a=R.a,b=R.b;cx.font="10px 'Press Start 2P'";
+  for(const [p,left] of [[a,true],[b,false]]){const x=left?22:W-22-380;const [rn,rc]=RAR[Math.min(10,Math.max(1,p.f.level))];
+    if(p.img){cx.save();cx.beginPath();cx.rect(left?x:x+330,16,50,50);cx.clip();cx.drawImage(p.img,left?x:x+330,16,50,50);cx.restore();}
+    cx.strokeStyle=rc;cx.lineWidth=2;cx.strokeRect(left?x:x+330,16,50,50);const bx=left?x+60:x;
+    bar(bx,18,320,18,p.hp/p.max,p.hp/p.max>.35?"#7dff9a":"#ff5e6c",!left);bar(bx,40,320,8,p.meter/100,p.meter>=100?"#ffd166":"#b48cff",!left);
+    cx.fillStyle="#eef2ff";cx.textAlign=left?"left":"right";cx.fillText(`${p.f.name.toUpperCase()}  LV${p.f.level}`,left?bx:bx+320,62);cx.fillStyle=rc;cx.fillText(rn.toUpperCase(),left?bx:bx+320,76);}
+  cx.textAlign="center";cx.font="9px 'Press Start 2P'";const ar=R.res.arena;cx.fillStyle=ar===2?"#ff5e6c":ar===1?"#7dff9a":"#8e9bc4";
+  cx.fillText(ar===2?"ZOOMIES · DMG x2 · CRITS":ar===1?"JOG · CRITS ON":"NAP · CALM",W/2,44);cx.fillStyle="#5a6694";cx.fillText(`EXCHANGE ${Math.min(R.step+1,R.res.exchanges)}/${R.res.exchanges} · DUEL #${R.meta.duelId}`,W/2,62);}
+let frame=0;
+function draw(){frame++;cx.save();if(R.shake>0){cx.translate((Math.random()-.5)*R.shake,(Math.random()-.5)*R.shake);R.shake*=.8;if(R.shake<.5)R.shake=0;}
+  const z=R.active&&R.res&&R.res.arena===2;const g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,z?"#1a0612":"#050816");g.addColorStop(1,z?"#2a0a1a":"#0b1024");cx.fillStyle=g;cx.fillRect(0,0,W,H);
+  cx.save();cx.translate(W/2,250);cx.rotate(frame*(wheel.rpm/60)*2*Math.PI/60);cx.strokeStyle=z?"rgba(255,94,108,.25)":"rgba(106,215,255,.16)";cx.lineWidth=14;cx.beginPath();cx.arc(0,0,150,0,7);cx.stroke();cx.lineWidth=4;for(let i=0;i<12;i++){cx.rotate(Math.PI/6);cx.beginPath();cx.moveTo(0,0);cx.lineTo(0,146);cx.stroke();}cx.restore();
+  cx.fillStyle="rgba(238,242,255,.35)";for(let i=0;i<40;i++)cx.fillRect((i*193)%W,(i*71)%200,2,2);
+  cx.fillStyle=z?"#3a0f1f":"#131a3a";cx.fillRect(0,FLOOR,W,H-FLOOR);cx.fillStyle=z?"#ff5e6c":"#6ad7ff";cx.fillRect(0,FLOOR,W,3);
+  if(R.active){tick();drawHamster(R.a,frame);drawHamster(R.b,frame);hud();}
+  for(const p of R.fx){p.x+=p.vx;p.y+=p.vy;p.vy+=.25;p.ttl--;cx.globalAlpha=Math.max(0,p.ttl/30);if(p.txt){cx.fillStyle=p.c;cx.font="13px 'Press Start 2P'";cx.textAlign="center";cx.fillText(p.txt,p.x,p.y);}else{cx.fillStyle=p.c;cx.fillRect(p.x,p.y,4,4);}}
+  cx.globalAlpha=1;R.fx=R.fx.filter(p=>p.ttl>0);
+  if(R.msgT>0&&R.msg){R.msgT--;cx.textAlign="center";cx.font="24px 'Press Start 2P'";cx.fillStyle="rgba(0,0,0,.6)";cx.fillText(R.msg,W/2+3,213);cx.fillStyle="#eef2ff";cx.fillText(R.msg,W/2,210);}
+  cx.restore();requestAnimationFrame(draw);}
+requestAnimationFrame(draw);
+boot();
+</script>
+</body>
+</html>
