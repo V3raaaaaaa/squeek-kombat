@@ -2,7 +2,8 @@
 
 **1v1 hamster duels on Squeekchain.** Your Genesis Squeek is your fighter. Squeektoshi's real wheel sets the arena. Every result is resolved on-chain on Sepolia and the browser only replays it.
 
-- Live site: _(GitHub Pages, set after push)_
+- Live site: [v3raaaaaaa.github.io/squeek-kombat](https://v3raaaaaaa.github.io/squeek-kombat/) (GitHub Pages, `gh-pages` branch = `web/` via `git subtree split --prefix web`)
+- Source: [github.com/V3raaaaaaa/squeek-kombat](https://github.com/V3raaaaaaa/squeek-kombat)
 - Contract (Sepolia): [`0x1a57aa9BE0a29B2238bBb7aDe4Ac44Aae8d94C4A`](https://sepolia.etherscan.io/address/0x1a57aa9BE0a29B2238bBb7aDe4Ac44Aae8d94C4A) — deployed block 12072953, [Sourcify-verified](https://repo.sourcify.dev/11155111/0x1a57aa9BE0a29B2238bBb7aDe4Ac44Aae8d94C4A), no owner
 - Built on [Squeekchain](https://squeekchain.com) · Sepolia testnet · unaudited · tokens have no value
 
