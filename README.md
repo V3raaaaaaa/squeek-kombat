@@ -2,8 +2,8 @@
 
 **1v1 hamster duels on Squeekchain.** Your Genesis Squeek is your fighter. Squeektoshi's real wheel sets the arena. Every result is resolved on-chain on Sepolia and the browser only replays it.
 
-- Live site: _(set after deploy)_
-- Contract (Sepolia): _(set after deploy, Sourcify-verified)_
+- Live site: _(GitHub Pages, set after push)_
+- Contract (Sepolia): [`0x1a57aa9BE0a29B2238bBb7aDe4Ac44Aae8d94C4A`](https://sepolia.etherscan.io/address/0x1a57aa9BE0a29B2238bBb7aDe4Ac44Aae8d94C4A) — deployed block 12072953, [Sourcify-verified](https://repo.sourcify.dev/11155111/0x1a57aa9BE0a29B2238bBb7aDe4Ac44Aae8d94C4A), no owner
 - Built on [Squeekchain](https://squeekchain.com) · Sepolia testnet · unaudited · tokens have no value
 
 ## How a duel works
@@ -50,7 +50,7 @@ SEPOLIA_RPC_URL=... forge test --match-contract Fork   # 6 fork tests on the liv
 forge test --match-contract SimVectors -vv | grep 'V,' > web/vectors.txt && node -e '...'  # JS parity (21/21)
 ```
 
-Unit tests cover controller resolution (owner / depositor / unknown token), arena resolution and gas bound (<450k), wheel classification (nap/jog/zoomies) and tracker advance, the full wager lifecycle (post → accept → resolve → payout; withdraw; expired window refunds; controller change before accept), zero-sum ELO, and a fuzz over all levels/arenas/seeds proving termination and a valid winner. Fork tests run against the real SqueekCore, Genesis collection and Staking: a real holder arena-fights with a **staked** Squeek, a stranger cannot, an unknown token reverts.
+Unit tests cover controller resolution (owner / depositor / unknown token), arena resolution and gas bound (<450k in Foundry's Cancun EVM; on Sepolia, which already runs Glamsterdam's state-creation repricing, a first fight for a fresh pair of Squeeks is estimated at ~0.9M gas), wheel classification (nap/jog/zoomies) and tracker advance, the full wager lifecycle (post → accept → resolve → payout; withdraw; expired window refunds; controller change before accept), zero-sum ELO, and a fuzz over all levels/arenas/seeds proving termination and a valid winner. Fork tests run against the real SqueekCore, Genesis collection and Staking: a real holder arena-fights with a **staked** Squeek, a stranger cannot, an unknown token reverts.
 
 ## Frontend
 
@@ -59,12 +59,10 @@ Unit tests cover controller resolution (owner / depositor / unknown token), aren
 ## Deploy & verify
 
 ```
-export DEPLOYER_PK=0x...   SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
-forge script script/Deploy.s.sol --rpc-url $SEPOLIA_RPC_URL --broadcast
-forge verify-contract <address> src/SqueekKombat.sol:SqueekKombat --chain sepolia --verifier sourcify \
-  --constructor-args $(cast abi-encode "constructor(address,address,address,address)" 0xFD6C166D4B8E2962E65746a13e5a0797CD4dE0c4 0xC4C7982657f00509548F3a3a41db7FA439a6856B 0x50fd1780526C3186A0c037c7622203bC4fb611ca 0xd78a3956cF63164d1Fa1C622ad3c66623162Fa1e)
+KEYFILE=path/to/deployer.key SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com ./script/deploy_sepolia.sh
 ```
-Then set `kombat` and `deployBlock` in `web/config.js`.
+
+The script builds, asks the node for a gas estimate, sends the creation with an explicit gas limit and verifies on Sourcify. The explicit limit matters: Sepolia already runs Glamsterdam, whose state-creation repricing (EIP-8037) makes code deposit cost ~1.5k gas per byte, so this 8.6 KB contract needs ~13.7M gas while Foundry's local EVM still estimates ~2.5M — a plain `forge script --broadcast` runs out of gas (that is what the three failed creations from the deployer before the live one are). `script/Deploy.s.sol` remains for local/anvil use. Then set `kombat` and `deployBlock` in `web/config.js`.
 
 ## Disclaimer
 

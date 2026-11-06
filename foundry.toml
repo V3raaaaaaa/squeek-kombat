@@ -13,9 +13,6 @@ ffi = false
 [rpc_endpoints]
 sepolia = "${SEPOLIA_RPC_URL}"
 
-[etherscan]
-sepolia = { key = "${ETHERSCAN_API_KEY}", chain = 11155111 }
-
 [fmt]
 line_length = 110
 tab_width = 4
