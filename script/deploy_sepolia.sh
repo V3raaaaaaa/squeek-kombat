@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # One-shot: deploy SqueekKombat to Sepolia, verify on Sourcify, print address + block.
-# Usage: KEYFILE=~/squeekchain/.kombat_deployer ./script/deploy_sepolia.sh
+# Usage: KEYFILE=path/to/deployer.key ./script/deploy_sepolia.sh   (hex private key, with or without 0x)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 RPC="${SEPOLIA_RPC_URL:-https://ethereum-sepolia-rpc.publicnode.com}"
-KEYFILE="${KEYFILE:-$HOME/squeekchain/.kombat_deployer}"
+KEYFILE="${KEYFILE:-deployer.key}"
 K=$(tr -d '[:space:]' < "$KEYFILE"); case "$K" in 0x*) ;; *) K="0x$K";; esac
 export DEPLOYER_PK="$K" SEPOLIA_RPC_URL="$RPC"
 
